@@ -9,7 +9,7 @@ import (
 
 type RegionService struct {
 	regionRepository repo.Regions
-	clickRepository repo.Click
+	clickRepository  repo.Click
 }
 
 func NewRegionService(repos *repo.Repository) *RegionService {
@@ -70,4 +70,45 @@ func (s *RegionService) GetMembersHeatMap(startDate, endDate time.Time) []*model
 	}
 
 	return res
+}
+
+func (s *RegionService) GetCountClick(startDate, endDate time.Time) []*model.CountClickByRegion {
+	clicks := s.clickRepository.GetAll()
+
+	countByRegion := make(map[int64]int64)
+	for _, click := range clicks {
+		clickDateTime := time.Date(
+			click.ClickDate.Year(),
+			click.ClickDate.Month(),
+			click.ClickDate.Day(),
+			click.ClickTime.Hour(),
+			click.ClickTime.Minute(),
+			click.ClickTime.Second(),
+			0,
+			time.UTC,
+		)
+
+		// Пропускаем клики вне временного интервала
+		if !startDate.IsZero() && clickDateTime.Before(startDate) {
+			continue
+		}
+		if !endDate.IsZero() && clickDateTime.After(endDate) {
+			continue
+		}
+
+		countByRegion[click.RegionID]++
+	}
+
+	regions := s.regionRepository.GetAll()
+
+	count := make([]*model.CountClickByRegion, 0, len(countByRegion))
+	for _, region := range regions {
+		count = append(count, &model.CountClickByRegion{
+			ID:          region.ID,
+			Name:        region.Name,
+			ClicksCount: countByRegion[region.ID],
+		})
+	}
+
+	return count
 }
