@@ -2,11 +2,11 @@ package service
 
 import (
 	"encoding/csv"
+	"log"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/gofrs/uuid"
 	"github.com/greenblat17/stream-telecom/internal/model"
 )
 
@@ -67,7 +67,7 @@ func (s *ActivityService) loadCampaigns() error {
 			continue
 		}
 
-		createdAt, err := time.Parse(time.RFC3339, record[1])
+		createdAt, err := time.Parse("2006-01-02 15:04:05", record[1])
 		if err != nil {
 			continue
 		}
@@ -99,33 +99,37 @@ func (s *ActivityService) loadClicks() error {
 			continue
 		}
 
-		uid, err := uuid.FromString(record[0])
+
+		clickDate, err := time.Parse("2006-01-02", record[0])
 		if err != nil {
+			log.Println("err", err)
 			continue
 		}
 
-		clickDate, err := time.Parse("2006-01-02", record[1])
+		clickTime, err := time.Parse("2006-01-02 15:04:05", record[1])
 		if err != nil {
+			log.Println("err", err)
 			continue
 		}
 
-		clickTime, err := time.Parse("15:04:05", record[2])
-		if err != nil {
-			continue
-		}
+		uid := record[2]
+
 
 		memberID, err := strconv.ParseInt(record[3], 10, 64)
 		if err != nil {
+			log.Println("err", err)
 			continue
 		}
 
 		campaignID, err := strconv.ParseInt(record[4], 10, 64)
 		if err != nil {
+			log.Println("err", err)
 			continue
 		}
 
 		regionID, err := strconv.ParseInt(record[5], 10, 64)
 		if err != nil {
+			log.Println("err", err)
 			continue
 		}
 
@@ -149,7 +153,7 @@ func (s *ActivityService) loadClicks() error {
 	return nil
 }
 
-func (s *ActivityService) GetCampaignActivity(campaignID int64) (*ActivityMetrics, error) {
+func (s *ActivityService) GetCampaignActivity(campaignID int64, countHours int64) (*ActivityMetrics, error) {
 	campaign, exists := s.campaigns[campaignID]
 	if !exists {
 		return nil, nil
@@ -158,17 +162,18 @@ func (s *ActivityService) GetCampaignActivity(campaignID int64) (*ActivityMetric
 	metrics := &ActivityMetrics{
 		CampaignID:   campaignID,
 		CreatedAt:    campaign.CreatedAt,
-		HourlyClicks: make([]int, 4),
-		TimeRange:    make([]string, 4),
+		HourlyClicks: make([]int, countHours),
+		TimeRange:    make([]string, countHours),
 	}
 
-	// Calculate time range for 4 hours
+	// Calculate time range for hours
 	startTime := campaign.CreatedAt
-	for i := 0; i < 4; i++ {
+	
+	for i := 0; i < int(countHours); i++ {
 		metrics.TimeRange[i] = startTime.Add(time.Duration(i) * time.Hour).Format("15:04")
 	}
 
-	// Count clicks within 4 hours
+	// Count clicks within specified hours
 	for _, click := range s.clicks {
 		if click.CampaignID != campaignID {
 			continue
@@ -185,13 +190,13 @@ func (s *ActivityService) GetCampaignActivity(campaignID int64) (*ActivityMetric
 			time.UTC,
 		)
 
-		if clickDateTime.Before(startTime) || clickDateTime.After(startTime.Add(4*time.Hour)) {
+		if clickDateTime.Before(startTime) || clickDateTime.After(startTime.Add(time.Duration(countHours) * time.Hour)) {
 			continue
 		}
 
 		metrics.TotalClicks++
 		hourIndex := int(clickDateTime.Sub(startTime).Hours())
-		if hourIndex >= 0 && hourIndex < 4 {
+		if hourIndex >= 0 && hourIndex < int(countHours) {
 			metrics.HourlyClicks[hourIndex]++
 		}
 	}
@@ -203,7 +208,7 @@ func (s *ActivityService) GetAllCampaignsActivity() ([]*ActivityMetrics, error) 
 	var metrics []*ActivityMetrics
 
 	for _, campaign := range s.campaigns {
-		campaignMetrics, err := s.GetCampaignActivity(campaign.ID)
+		campaignMetrics, err := s.GetCampaignActivity(campaign.ID, 4)
 		if err != nil {
 			return nil, err
 		}

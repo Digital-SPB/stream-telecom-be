@@ -2,12 +2,10 @@ package model
 
 import (
 	"time"
-
-	"github.com/gofrs/uuid"
 )
 
 type Click struct {
-	ID uuid.UUID `json:"uid"`
+	ID string `json:"uid"`
 	ClickDate time.Time `json:"click_date"`
 	ClickTime time.Time `json:"click_time"`
 	MemberID int64 `json:"member_id"`

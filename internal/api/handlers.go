@@ -36,7 +36,19 @@ func (h *Handler) GetCampaignActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	metrics, err := h.activityService.GetCampaignActivity(campaignID)
+	countHoursStr := r.URL.Query().Get("count_hours")
+	if countHoursStr == "" {
+		http.Error(w, "count_hours is required", http.StatusBadRequest)
+		return
+	}
+
+	countHours, err := strconv.ParseInt(countHoursStr, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid count_hours", http.StatusBadRequest)
+		return
+	}
+
+	metrics, err := h.activityService.GetCampaignActivity(campaignID, countHours)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
