@@ -1,33 +1,58 @@
 package main
 
 import (
-	"log"
+	"context"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/greenblat17/stream-telecom/internal/api"
+	handlers "github.com/greenblat17/stream-telecom/internal/handler"
+	"github.com/greenblat17/stream-telecom/internal/repo"
 	"github.com/greenblat17/stream-telecom/internal/service"
+	"github.com/greenblat17/stream-telecom/pkg/httpserver"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	// Initialize services
-	activityService := service.NewActivityService()
-	if err := activityService.LoadData(); err != nil {
-		log.Fatalf("Failed to load data: %v", err)
+	Run()
+}
+
+func Run() {
+	//logrus
+	logrus.SetFormatter(new(logrus.JSONFormatter))
+
+	// Repositories
+	repos := repo.NewRepository()
+
+	// Service
+	services := service.NewService(repos)
+
+	// Handlers
+	handlers := handlers.NewHandler(services)
+	// handlers := handle/r.NewHandler(services)
+	//handlers := handler.NewHandler(services)
+
+	//HTTP server
+
+	srv := new(httpserver.Server)
+
+	go func() {
+		if err := srv.Run("8000", handlers.InitRoutes()); err != http.ErrServerClosed {
+			logrus.Fatalf("error occured while running server: %s", err.Error())
+		}
+	}()
+
+	logrus.Print("hui zalupa i pizda")
+
+	//gracefull shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	logrus.Print("shutting down")
+	if err := srv.ShutDown(context.Background()); err != nil {
+		logrus.Errorf("error while server shutting down: %s", err.Error())
 	}
 
-	// Initialize handlers
-	handler := api.NewHandler(activityService)
-
-	// Set up routes
-	mux := http.NewServeMux()
-	mux.HandleFunc("/api/v1/campaigns", handler.GetAllCampaigns)
-	mux.HandleFunc("/api/v1/campaigns/activity", handler.GetAllCampaignsActivity)
-	mux.HandleFunc("/api/v1/campaigns/activity/single", handler.GetCampaignActivity)
-	mux.HandleFunc("/api/v1/campaigns/reaction-time", handler.GetCustomerReactionTime)
-
-	// Start server
-	log.Println("Server starting on :8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
-	}
-} 
+}
