@@ -10,3 +10,9 @@ type RegionMembersHeatMap struct {
 	Name string `json:"name"`
 	MembersCount int64 `json:"members_count"`
 }
+
+type RegionInfo struct {
+    ID          int    `json:"id"`
+    NameEnglish string `json:"name_english"`
+    UTCoffset   string `json:"utc_offset"`
+}

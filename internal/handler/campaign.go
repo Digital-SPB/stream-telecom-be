@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,22 +14,22 @@ func (h *Handler) allCampaigns(c *gin.Context) {
 	perPageStr := c.Query("per_page")
 
 	page := 1
-    perPage := 10
+	perPage := 10
 
-    if pageStr != "" {
-        if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-            page = p
-        }
-    }
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
 
-    if perPageStr != "" {
-        if pp, err := strconv.Atoi(perPageStr); err == nil && pp > 0 {
-            perPage = pp
-        }
-    }
-	
+	if perPageStr != "" {
+		if pp, err := strconv.Atoi(perPageStr); err == nil && pp > 0 {
+			perPage = pp
+		}
+	}
+
 	campaigns := h.services.GetAllCampaigns(page, perPage)
-	
+
 	c.JSON(http.StatusOK, campaigns)
 }
 
@@ -75,4 +77,35 @@ func (h *Handler) campainActivity(c *gin.Context) {
 	c.JSON(http.StatusOK, metrics)
 }
 
-func (h *Handler) campainCreateDynamic(c *gin.Context) {}
+func (h *Handler) campainCreateDynamic(c *gin.Context) {
+	intervalType := c.Query("interval_type")
+	startTimeString := c.Query("start_time")
+	endTimeString := c.Query("end_time")
+
+	starTime, err := time.Parse("2006-01-02", startTimeString)
+	fmt.Println(startTimeString)
+	fmt.Println(starTime)
+	fmt.Println(err)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid start time")
+	}
+	endTime, err := time.Parse("2006-01-02", endTimeString)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid end time")
+		return
+	}
+
+	fmt.Println(intervalType)
+	if intervalType != "day" && intervalType != "month" {
+		newErrorResponse(c, http.StatusBadGateway, "invalid interval type")
+		return
+	}
+
+	res, err := h.services.GetCreationDynamic(starTime, endTime, intervalType)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, "server error")
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}

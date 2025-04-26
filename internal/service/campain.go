@@ -35,7 +35,7 @@ func (s *CampaignService) GetCampaignActivity(campaignID int64, countHours int64
 
 	// Calculate time range for hours
 	startTime := campaign.CreatedAt
-	
+
 	for i := 0; i < int(countHours); i++ {
 		metrics.TimeRange[i] = startTime.Add(time.Duration(i) * time.Hour).Format("15:04")
 	}
@@ -44,7 +44,7 @@ func (s *CampaignService) GetCampaignActivity(campaignID int64, countHours int64
 
 	// Count clicks within specified hours
 	for _, click := range clicks {
-	
+
 		clickDateTime := time.Date(
 			click.ClickDate.Year(),
 			click.ClickDate.Month(),
@@ -56,7 +56,7 @@ func (s *CampaignService) GetCampaignActivity(campaignID int64, countHours int64
 			time.UTC,
 		)
 
-		if clickDateTime.Before(startTime) || clickDateTime.After(startTime.Add(time.Duration(countHours) * time.Hour)) {
+		if clickDateTime.Before(startTime) || clickDateTime.After(startTime.Add(time.Duration(countHours)*time.Hour)) {
 			continue
 		}
 
@@ -81,7 +81,7 @@ func (s *CampaignService) GetAllCampaigns(page, perPage int) *model.CampaignList
 	campaigns := s.campaignRepository.GetAllCampaigns()
 
 	campaignsInfo := make([]model.CampaignInfo, 0, len(campaigns))
-	
+
 	// Собираем все кампании
 	for _, campaign := range campaigns {
 		campaignsInfo = append(campaignsInfo, model.CampaignInfo{
@@ -118,4 +118,8 @@ func (s *CampaignService) GetAllCampaigns(page, perPage int) *model.CampaignList
 		TotalPages: totalPages,
 		Campaigns:  campaignsInfo[start:end],
 	}
-} 
+}
+
+func (s *CampaignService) GetCreationDynamic(start time.Time, end time.Time, intervalType string) ([]*model.IntervalResult, error) {
+	return s.campaignRepository.GetCreationDynamic(start, end, intervalType)
+}

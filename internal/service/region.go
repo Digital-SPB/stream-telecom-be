@@ -71,3 +71,7 @@ func (s *RegionService) GetMembersHeatMap(startDate, endDate time.Time) []*model
 
 	return res
 }
+
+func (s *RegionService) GetRegionsInfo() []*model.RegionInfo {
+	return s.regionRepository.GetRegionsInfo()
+}

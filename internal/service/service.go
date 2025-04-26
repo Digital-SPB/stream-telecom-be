@@ -12,6 +12,7 @@ import (
 type Campaign interface {
 	GetCampaignActivity(campaignID int64, countHours int64) (*model.ActivityMetrics, error)
 	GetAllCampaigns(page, perPage int) *model.CampaignList
+	GetCreationDynamic(start time.Time, end time.Time, intervalType string) ([]*model.IntervalResult, error)
 }
 
 type Click interface {
@@ -21,6 +22,7 @@ type Click interface {
 
 type Regions interface {
 	GetMembersHeatMap(startDate, endDate time.Time) []*model.RegionMembersHeatMap
+	GetRegionsInfo() []*model.RegionInfo
 }
 
 type Service struct {

@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -65,8 +66,6 @@ func LoadCampaignRepo() *CampaignRepo {
 		})
 	}
 
-	
-
 	return &CampaignRepo{
 		Campaignes: res,
 	}
@@ -83,4 +82,49 @@ func (r *CampaignRepo) GetByID(id int64) (*model.Campaign, error) {
 
 func (r *CampaignRepo) GetAllCampaigns() []*model.Campaign {
 	return r.Campaignes
+}
+
+func (r *CampaignRepo) GetCreationDynamic(start time.Time, end time.Time, intervalType string) ([]*model.IntervalResult, error) {
+	// Инициализируем карту для подсчета
+	resultMap := make(map[time.Time]int)
+
+	// Перебираем все кампании
+	for _, campaign := range r.Campaignes {
+		createdAt := campaign.CreatedAt
+
+		// Проверяем, попадает ли дата создания в заданный интервал
+		if (createdAt.Equal(start) || createdAt.After(start)) && (createdAt.Equal(end) || createdAt.Before(end)) {
+			var key time.Time
+
+			// Определяем ключ для группировки в зависимости от типа интервала
+			if intervalType == "day" {
+				key = time.Date(createdAt.Year(), createdAt.Month(), createdAt.Day(), 0, 0, 0, 0, createdAt.Location())
+			} else { // month
+				key = time.Date(createdAt.Year(), createdAt.Month(), 1, 0, 0, 0, 0, createdAt.Location())
+			}
+
+			resultMap[key]++
+		}
+	}
+
+	// Если нет данных в интервале, возвращаем пустой результат
+	if len(resultMap) == 0 {
+		return []*model.IntervalResult{}, nil
+	}
+
+	// Преобразуем карту в слайс IntervalResult
+	var result []*model.IntervalResult
+	for date, count := range resultMap {
+		result = append(result, &model.IntervalResult{
+			Date:  date,
+			Count: count,
+		})
+	}
+
+	// Сортируем результат по дате
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Date.Before(result[j].Date)
+	})
+
+	return result, nil
 }
