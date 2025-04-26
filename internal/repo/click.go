@@ -110,3 +110,7 @@ func (r *ClickRepo) GetByCampaignID(id int64) []*model.Click {
 	}
 	return clicks
 }
+
+func (r *ClickRepo) GetAll() []*model.Click {
+	return r.Clicks
+}
