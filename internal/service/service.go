@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/greenblat17/stream-telecom/internal/model"
 	"github.com/greenblat17/stream-telecom/internal/repo"
 )
@@ -18,6 +20,7 @@ type Click interface {
 }
 
 type Regions interface {
+	GetHeatMap(startDate, endDate time.Time) []*model.RegionHeatMap
 }
 
 type Service struct {

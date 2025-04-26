@@ -10,7 +10,7 @@ import (
 )
 
 type RegionsRepo struct {
-	Regions *[]model.Region
+	Regions []*model.Region
 }
 
 func LoadRegionsRepo() *RegionsRepo {
@@ -29,7 +29,7 @@ func LoadRegionsRepo() *RegionsRepo {
 		return nil
 	}
 
-	var res []model.Region
+	var res []*model.Region
 
 	for i, record := range records {
 		if i == 0 {
@@ -49,13 +49,17 @@ func LoadRegionsRepo() *RegionsRepo {
 			continue
 		}
 
-		res = append(res, model.Region{
+		res = append(res, &model.Region{
 			ID:   id,
 			Name: record[1],
 		})
 	}
 
 	return &RegionsRepo{
-		Regions: &res,
+		Regions: res,
 	}
+}
+
+func (r *RegionsRepo) GetAll() []*model.Region {
+	return r.Regions
 }

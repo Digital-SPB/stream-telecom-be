@@ -12,9 +12,11 @@ type Campaign interface {
 type Click interface {
 	GetClickDynamic(id int64) (*model.CampaignStats, error)
 	GetByCampaignID(id int64) []*model.Click
+	GetAll() []*model.Click
 }
 
 type Regions interface {
+	GetAll() []*model.Region
 }
 
 type Repository struct {

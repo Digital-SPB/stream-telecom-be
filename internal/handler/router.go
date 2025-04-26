@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/greenblat17/stream-telecom/internal/service"
 )
@@ -33,18 +30,4 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	}
 
 	return router
-}
-
-type ErrorResponse struct {
-	Status  int    `json:"status"`
-	Message string `json:"message"`
-}
-
-func writeJSONError(w http.ResponseWriter, status int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(ErrorResponse{
-		Status:  status,
-		Message: message,
-	})
 }
