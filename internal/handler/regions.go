@@ -51,7 +51,8 @@ func (h *Handler) heatMap(c *gin.Context) {
 		return
 	}
 
-	heatMap := h.services.Regions.GetHeatMap(start, end)
+	heatMap := h.services.Regions.GetMembersHeatMap(start, end)
+	
 	c.JSON(http.StatusOK, heatMap)
 }
 
