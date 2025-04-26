@@ -13,6 +13,8 @@ type Campaign interface {
 }
 
 type Click interface {
+	GetClickDynamic(id int64) (*model.CampaignStats, error) 
+	GetCustomerReactionTime(campaignID int64) (*model.ReactionTimeMetrics, error)
 }
 
 type Regions interface {

@@ -1,45 +1,41 @@
 package service
 
 import (
-<<<<<<< HEAD
-=======
 	"fmt"
 	"math"
 	"sort"
 	"time"
 
->>>>>>> cfb156695d7792d1a62c696ed040c9b8e24d943c
 	"github.com/greenblat17/stream-telecom/internal/model"
 	"github.com/greenblat17/stream-telecom/internal/repo"
 )
 
 type ClickService struct {
-	clickRepository repo.Click
+	clickRepository    repo.Click
 	campaignRepository repo.Campaign
 }
 
 func NewClickService(repos *repo.Repository) *ClickService {
 	return &ClickService{
-		clickRepository: repos.Click,
+		clickRepository:    repos.Click,
 		campaignRepository: repos.Campaign,
 	}
 }
 
-<<<<<<< HEAD
 func (s *ClickService) GetClickDynamic(id int64) (*model.CampaignStats, error) {
-	return s.repos.GetClickDynamic(id)
+	return s.clickRepository.GetClickDynamic(id)
 }
-=======
+
 func formatDuration(seconds float64) model.FormattedDuration {
 	// Convert to integer seconds
 	totalSeconds := int(seconds)
-	
+
 	// Calculate each unit
 	secondsInMinute := 60
 	secondsInHour := 60 * secondsInMinute
 	secondsInDay := 24 * secondsInHour
-	secondsInMonth := 30 * secondsInDay    // Approximation
-	secondsInYear := 365 * secondsInDay    // Approximation
+	secondsInMonth := 30 * secondsInDay // Approximation
+	secondsInYear := 365 * secondsInDay // Approximation
 
 	years := totalSeconds / secondsInYear
 	totalSeconds = totalSeconds % secondsInYear
@@ -96,7 +92,7 @@ func (s *ClickService) GetCustomerReactionTime(campaignID int64) (*model.Reactio
 		}
 
 		reactionTime := clickDateTime.Sub(campaign.CreatedAt)
-		
+
 		// If this is the first click for this member or earlier than previous first click
 		if currentTime, exists := memberFirstClicks[click.MemberID]; !exists || reactionTime < currentTime {
 			memberFirstClicks[click.MemberID] = reactionTime
@@ -162,4 +158,3 @@ func calculateClickPercentile(sorted []float64, percentile float64) float64 {
 	fraction := index - float64(i)
 	return sorted[i] + fraction*(sorted[i+1]-sorted[i])
 }
->>>>>>> cfb156695d7792d1a62c696ed040c9b8e24d943c

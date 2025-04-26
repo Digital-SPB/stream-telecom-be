@@ -3,12 +3,6 @@ package handlers
 import (
 	"net/http"
 	"strconv"
-<<<<<<< HEAD
-=======
-
-	"github.com/gin-gonic/gin"
-)
->>>>>>> cfb156695d7792d1a62c696ed040c9b8e24d943c
 
 	"github.com/gin-gonic/gin"
 )
