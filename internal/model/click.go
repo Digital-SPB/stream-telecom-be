@@ -2,12 +2,10 @@ package model
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Click struct {
-	ID         uuid.UUID `json:"uid"`
+	ID         string    `json:"uid"`
 	ClickDate  time.Time `json:"click_date"`
 	ClickTime  time.Time `json:"click_time"`
 	MemberID   int64     `json:"member_id"`
@@ -19,3 +17,23 @@ type Click struct {
 	Language   string    `json:"language"`
 	Device     string    `json:"device"`
 }
+
+
+//три структуры для 2 ручки
+type DailyStat struct {
+	Date          time.Time `json:"date"`
+	ClicksCount   int       `json:"clicks_count"`
+	Percentage    float64   `json:"percentage"`
+}
+
+type MonthlyStat struct {
+	Month         time.Time `json:"month"`
+	ClicksCount   int       `json:"clicks_count"`
+	Percentage    float64   `json:"percentage"`
+}
+
+type CampaignStats struct {
+	DailyStats   []*DailyStat  `json:"daily_stats"`
+	MonthlyStats []*MonthlyStat `json:"monthly_stats"`
+	TotalClicks  int          `json:"total_clicks"`
+} 

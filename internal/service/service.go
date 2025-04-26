@@ -1,6 +1,9 @@
 package service
 
-import "github.com/greenblat17/stream-telecom/internal/repo"
+import (
+	"github.com/greenblat17/stream-telecom/internal/model"
+	"github.com/greenblat17/stream-telecom/internal/repo"
+)
 
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
 
@@ -9,6 +12,7 @@ type Campaign interface {
 }
 
 type Click interface {
+	GetClickDynamic(id int64) (*model.CampaignStats, error)
 }
 
 type Regions interface {
@@ -22,8 +26,8 @@ type Service struct {
 
 func NewService(repos *repo.Repository) *Service {
 	return &Service{
-		Campaign:  NewCampaignService(repos),
-		Click: NewClickService(repos),
+		Campaign: NewCampaignService(repos),
+		Click:    NewClickService(repos),
 		Regions:  NewRegionService(repos),
 	}
 }
