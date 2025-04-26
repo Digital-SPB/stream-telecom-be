@@ -12,8 +12,12 @@ type ActivityMetrics struct {
 	CampaignID    int64     `json:"campaign_id"`
 	CreatedAt     time.Time `json:"created_at"`
 	TotalClicks   int       `json:"total_clicks"`
-	HourlyClicks  []int     `json:"hourly_clicks"`
-	TimeRange     []string  `json:"time_range"`
+	HourlyClicks []*HourlyClicks `json:"hourly_clicks"`
+}
+
+type HourlyClicks struct {
+	Hour string `json:"hour"`
+	Clicks int64 `json:"clicks"`
 }
 
 type FormattedDuration struct {

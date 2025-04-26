@@ -29,15 +29,16 @@ func (s *CampaignService) GetCampaignActivity(campaignID int64, countHours int64
 	metrics := &model.ActivityMetrics{
 		CampaignID:   campaignID,
 		CreatedAt:    campaign.CreatedAt,
-		HourlyClicks: make([]int, countHours),
-		TimeRange:    make([]string, countHours),
+		HourlyClicks: make([]*model.HourlyClicks, countHours),
 	}
 
 	// Calculate time range for hours
 	startTime := campaign.CreatedAt
 	
 	for i := 0; i < int(countHours); i++ {
-		metrics.TimeRange[i] = startTime.Add(time.Duration(i) * time.Hour).Format("15:04")
+		metrics.HourlyClicks[i] = &model.HourlyClicks{
+			Hour: startTime.Add(time.Duration(i) * time.Hour).Format("15:04"),
+		}
 	}
 
 	clicks := s.clickRepository.GetByCampaignID(campaignID)
@@ -63,7 +64,7 @@ func (s *CampaignService) GetCampaignActivity(campaignID int64, countHours int64
 		metrics.TotalClicks++
 		hourIndex := int(clickDateTime.Sub(startTime).Hours())
 		if hourIndex >= 0 && hourIndex < int(countHours) {
-			metrics.HourlyClicks[hourIndex]++
+			metrics.HourlyClicks[hourIndex].Clicks++
 		}
 	}
 
