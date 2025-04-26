@@ -1,12 +1,16 @@
 package repo
 
-import "context"
+import (
+	"github.com/greenblat17/stream-telecom/internal/model"
+)
 
 type Campaign interface {
-	GetCampainActivity(id int, ctx context.Context)
+	GetByID(id int64) (*model.Campaign, error)
+	GetAllCampaigns() []*model.Campaign
 }
 
 type Click interface {
+	GetByCampaignID(id int64) []*model.Click
 }
 
 type Regions interface {
