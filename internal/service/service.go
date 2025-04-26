@@ -20,7 +20,7 @@ type Click interface {
 }
 
 type Regions interface {
-	GetHeatMap(startDate, endDate time.Time) []*model.RegionHeatMap
+	GetMembersHeatMap(startDate, endDate time.Time) []*model.RegionMembersHeatMap
 }
 
 type Service struct {

@@ -19,12 +19,20 @@ func NewRegionService(repos *repo.Repository) *RegionService {
 	}
 }
 
-func (s *RegionService) GetHeatMap(startDate, endDate time.Time) []*model.RegionHeatMap {
+func (s *RegionService) GetMembersHeatMap(startDate, endDate time.Time) []*model.RegionMembersHeatMap {
 	regions := s.regionRepository.GetAll()
 	clicks := s.clickRepository.GetAll()
 
-	heatMap := make(map[int64]int64)
+	// Карта регионов с множеством уникальных member_id
+	// map[RegionID]map[MemberID]struct{}
+	membersByRegion := make(map[int64]map[int64]struct{})
 
+	// Инициализируем множества для каждого региона
+	for _, region := range regions {
+		membersByRegion[region.ID] = make(map[int64]struct{})
+	}
+
+	// Обрабатываем клики
 	for _, click := range clicks {
 		clickDateTime := time.Date(
 			click.ClickDate.Year(),
@@ -37,6 +45,7 @@ func (s *RegionService) GetHeatMap(startDate, endDate time.Time) []*model.Region
 			time.UTC,
 		)
 
+		// Пропускаем клики вне временного интервала
 		if !startDate.IsZero() && clickDateTime.Before(startDate) {
 			continue
 		}
@@ -44,16 +53,19 @@ func (s *RegionService) GetHeatMap(startDate, endDate time.Time) []*model.Region
 			continue
 		}
 
-		heatMap[click.RegionID]++
+		// Добавляем member_id в множество для соответствующего региона
+		if _, exists := membersByRegion[click.RegionID]; exists {
+			membersByRegion[click.RegionID][click.MemberID] = struct{}{}
+		}
 	}
 
-	res := make([]*model.RegionHeatMap, 0)
-
+	// Формируем результат
+	res := make([]*model.RegionMembersHeatMap, 0)
 	for _, region := range regions {
-		res = append(res, &model.RegionHeatMap{
-			ID:         region.ID,
-			Name:       region.Name,
-			ClickCount: heatMap[region.ID],
+		res = append(res, &model.RegionMembersHeatMap{
+			ID:           region.ID,
+			Name:         region.Name,
+			MembersCount: int64(len(membersByRegion[region.ID])), // количество уникальных пользователей
 		})
 	}
 
