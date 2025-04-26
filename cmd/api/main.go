@@ -20,8 +20,10 @@ func main() {
 
 	// Set up routes
 	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v1/campaigns", handler.GetAllCampaigns)
 	mux.HandleFunc("/api/v1/campaigns/activity", handler.GetAllCampaignsActivity)
 	mux.HandleFunc("/api/v1/campaigns/activity/single", handler.GetCampaignActivity)
+	mux.HandleFunc("/api/v1/campaigns/reaction-time", handler.GetCustomerReactionTime)
 
 	// Start server
 	log.Println("Server starting on :8080")
