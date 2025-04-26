@@ -8,11 +8,11 @@ import (
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
 
 type Campaign interface {
-	//GetCampaignActivity(campaignID int64) (*ActivityMetrics, error)
+	GetCampaignActivity(campaignID int64, countHours int64) (*model.ActivityMetrics, error)
+	GetAllCampaigns(page, perPage int) *model.CampaignList
 }
 
 type Click interface {
-	GetClickDynamic(id int64) (*model.CampaignStats, error)
 }
 
 type Regions interface {

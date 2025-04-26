@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"context"
 	"encoding/csv"
 	"fmt"
 	"os"
@@ -9,10 +8,11 @@ import (
 	"time"
 
 	"github.com/greenblat17/stream-telecom/internal/model"
+	"github.com/greenblat17/stream-telecom/pkg/generator"
 )
 
 type CampaignRepo struct {
-	Campaignes *[]model.Campaign
+	Campaignes []*model.Campaign
 }
 
 func LoadCampaignRepo() *CampaignRepo {
@@ -31,7 +31,7 @@ func LoadCampaignRepo() *CampaignRepo {
 		return nil
 	}
 
-	var res []model.Campaign
+	var res []*model.Campaign
 
 	for i, record := range records {
 		if i == 0 {
@@ -58,17 +58,29 @@ func LoadCampaignRepo() *CampaignRepo {
 			continue
 		}
 
-		res = append(res, model.Campaign{
+		res = append(res, &model.Campaign{
 			ID:        id,
 			CreatedAt: createdAt,
+			Name:      generator.GenerateCampaignName(id),
 		})
 	}
 
 	
 
 	return &CampaignRepo{
-		Campaignes: &res,
+		Campaignes: res,
 	}
 }
 
-func (r *CampaignRepo) GetCampainActivity(id int, ctx context.Context) {}
+func (r *CampaignRepo) GetByID(id int64) (*model.Campaign, error) {
+	for _, campaign := range r.Campaignes {
+		if campaign.ID == id {
+			return campaign, nil
+		}
+	}
+	return nil, fmt.Errorf("campaign not found")
+}
+
+func (r *CampaignRepo) GetAllCampaigns() []*model.Campaign {
+	return r.Campaignes
+}

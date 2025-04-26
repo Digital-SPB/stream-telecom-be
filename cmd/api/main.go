@@ -38,7 +38,7 @@ func Run() {
 	srv := new(httpserver.Server)
 
 	go func() {
-		if err := srv.Run("8000", handlers.InitRoutes()); err != http.ErrServerClosed {
+		if err := srv.Run("8080", handlers.InitRoutes()); err != http.ErrServerClosed {
 			logrus.Fatalf("error occured while running server: %s", err.Error())
 		}
 	}()

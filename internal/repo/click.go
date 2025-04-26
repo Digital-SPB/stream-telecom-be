@@ -43,22 +43,27 @@ func LoadClickRepo() *ClickRepo {
 			fmt.Printf("Not enough fields in line %d\n", i+1)
 			continue
 		}
+<<<<<<< HEAD
 		// Парсим UUID
 		uid := record[0]
+=======
+>>>>>>> cfb156695d7792d1a62c696ed040c9b8e24d943c
 
 		// Парсим дату клика (предполагаем формат "2006-01-02")
-		clickDate, err := time.Parse("2006-01-02", record[1])
+		clickDate, err := time.Parse("2006-01-02", record[0])
 		if err != nil {
 			fmt.Printf("Error parsing ClickDate on line %d: %v\n", i+1, err)
 			continue
 		}
 
 		// Парсим время клика (предполагаем формат "15:04:05")
-		clickTime, err := time.Parse("15:04:05", record[2])
+		clickTime, err := time.Parse("2006-01-02 15:04:05", record[1])
 		if err != nil {
 			fmt.Printf("Error parsing ClickTime on line %d: %v\n", i+1, err)
 			continue
 		}
+
+		uid := record[2]
 
 		// Парсим числовые ID
 		memberID, err := strconv.ParseInt(record[3], 10, 64)
@@ -102,6 +107,7 @@ func LoadClickRepo() *ClickRepo {
 	}
 }
 
+<<<<<<< HEAD
 /*
 сколько кликов по компании в день
 % от клиеов по компании за все время
@@ -187,4 +193,14 @@ func (r *ClickRepo) GetClickDynamic(id int64) (*model.CampaignStats, error) {
 		MonthlyStats: monthlyStats,
 		TotalClicks:  totalClicks,
 	}, nil
+=======
+func (r *ClickRepo) GetByCampaignID(id int64) []*model.Click {
+	var clicks []*model.Click
+	for _, click := range r.Clicks {
+		if click.CampaignID == id {
+			clicks = append(clicks, click)
+		}
+	}
+	return clicks
+>>>>>>> cfb156695d7792d1a62c696ed040c9b8e24d943c
 }
