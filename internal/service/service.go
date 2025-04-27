@@ -18,6 +18,7 @@ type Campaign interface {
 type Click interface {
 	GetClickDynamic(id int64) (*model.CampaignStats, error)
 	GetCustomerReactionTime(campaignID int64) (*model.ReactionTimeMetrics, error)
+	GetTimeActivity() *model.TimeActivityResponse
 }
 
 type Regions interface {
@@ -34,8 +35,8 @@ type Service struct {
 
 func NewService(repos *repo.Repository) *Service {
 	return &Service{
-		Campaign: NewCampaignService(repos),
 		Click:    NewClickService(repos),
+		Campaign: NewCampaignService(repos),
 		Regions:  NewRegionService(repos),
 	}
 }

@@ -202,3 +202,59 @@ func (r *ClickRepo) GetByCampaignID(id int64) []*model.Click {
 func (r *ClickRepo) GetAll() []*model.Click {
 	return r.Clicks
 }
+
+func (r *ClickRepo) GetTimeActivity() *model.TimeActivityResponse {
+	// Создаем матрицу для хранения количества кликов по дням недели и часам
+	activityMatrix := make(map[string]map[int]int)
+	daysOfWeek := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+	
+	// Инициализируем матрицу
+	for _, day := range daysOfWeek {
+		activityMatrix[day] = make(map[int]int)
+		for hour := 0; hour < 24; hour++ {
+			activityMatrix[day][hour] = 0
+		}
+	}
+
+	// Подсчитываем клики с учетом часовых поясов
+	for _, click := range r.Clicks {
+		// Получаем смещение времени для региона
+		offset := model.GetRegionOffset(click.RegionID)
+		
+		// Конвертируем время клика из UTC в локальное время региона
+		localTime := click.ClickTime.Add(time.Duration(offset) * time.Hour)
+		
+		// Получаем день недели и час в локальном времени
+		dayOfWeek := localTime.Weekday().String()
+		hour := localTime.Hour()
+		
+		// Увеличиваем счетчик для соответствующего дня и часа
+		activityMatrix[dayOfWeek][hour]++
+	}
+
+	// Формируем ответ
+	response := &model.TimeActivityResponse{
+		DayStats: make([]model.DayActivity, 0, 7),
+	}
+
+	// Заполняем статистику по дням
+	for _, day := range daysOfWeek {
+		dayActivity := model.DayActivity{
+			Day:       day,
+			HourStats: make([]model.HourActivity, 0, 24),
+		}
+
+		// Заполняем статистику по часам
+		for hour := 0; hour < 24; hour++ {
+			hourActivity := model.HourActivity{
+				Hour:     hour,
+				Activity: activityMatrix[day][hour],
+			}
+			dayActivity.HourStats = append(dayActivity.HourStats, hourActivity)
+		}
+
+		response.DayStats = append(response.DayStats, dayActivity)
+	}
+
+	return response
+}

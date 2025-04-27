@@ -36,3 +36,19 @@ type CampaignStats struct {
 	MonthlyStats []*MonthlyStat `json:"monthly_stats"`
 	TotalClicks  int            `json:"total_clicks"`
 }
+
+// Структуры для тепловой карты активности по времени
+type HourActivity struct {
+	Hour     int `json:"hour"`      // Час (0-23)
+	Activity int `json:"activity"`   // Количество кликов
+}
+
+type DayActivity struct {
+	Day       string          `json:"day"`        // День недели (Monday, Tuesday, etc.)
+	HourStats []HourActivity  `json:"hour_stats"` // Статистика по часам
+}
+
+type TimeActivityResponse struct {
+	DayStats []DayActivity `json:"day_stats"` // Статистика по дням недели
+}
+

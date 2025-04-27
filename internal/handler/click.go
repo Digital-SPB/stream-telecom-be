@@ -48,4 +48,10 @@ func (h *Handler) clientReactionSpeed(c *gin.Context) {
 	c.JSON(http.StatusOK, metrics)
 }
 
-func (h *Handler) predictedBestTime(c *gin.Context) {}
+func (h *Handler) predictedBestTime(c *gin.Context) {
+	// Получаем статистику активности по времени
+	timeActivity := h.services.GetTimeActivity()
+	
+	// Возвращаем успешный ответ
+	c.JSON(http.StatusOK, timeActivity)
+}

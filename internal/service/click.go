@@ -158,3 +158,7 @@ func calculateClickPercentile(sorted []float64, percentile float64) float64 {
 	fraction := index - float64(i)
 	return sorted[i] + fraction*(sorted[i+1]-sorted[i])
 }
+
+func (s *ClickService) GetTimeActivity() *model.TimeActivityResponse {
+	return s.clickRepository.GetTimeActivity()
+}
