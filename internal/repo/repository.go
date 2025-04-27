@@ -17,6 +17,7 @@ type Click interface {
 	GetByCampaignID(id int64) []*model.Click
 	GetAll() []*model.Click
 	GetTimeActivity() *model.TimeActivityResponse
+	GetDailyTimeActivity(targetDate time.Time) *model.DailyTimeActivityResponse
 }
 
 type Regions interface {

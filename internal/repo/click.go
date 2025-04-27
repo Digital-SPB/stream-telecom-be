@@ -258,3 +258,43 @@ func (r *ClickRepo) GetTimeActivity() *model.TimeActivityResponse {
 
 	return response
 }
+
+func (r *ClickRepo) GetDailyTimeActivity(targetDate time.Time) *model.DailyTimeActivityResponse {
+	// Создаем массив для хранения количества кликов по часам
+	hourlyActivity := make([]model.HourActivity, 24)
+	for i := 0; i < 24; i++ {
+		hourlyActivity[i] = model.HourActivity{
+			Hour:     i,
+			Activity: 0,
+		}
+	}
+
+	totalClicks := 0
+
+	// Проходим по всем кликам
+	for _, click := range r.Clicks {
+		// Проверяем, что клик был в нужный день
+		if click.ClickDate.Year() == targetDate.Year() &&
+			click.ClickDate.Month() == targetDate.Month() &&
+			click.ClickDate.Day() == targetDate.Day() {
+			
+			// Получаем смещение времени для региона
+			offset := model.GetRegionOffset(click.RegionID)
+			
+			// Конвертируем время клика из UTC в локальное время региона
+			localTime := click.ClickTime.Add(time.Duration(offset) * time.Hour)
+			
+			// Увеличиваем счетчик для соответствующего часа
+			hour := localTime.Hour()
+			hourlyActivity[hour].Activity++
+			totalClicks++
+		}
+	}
+
+	return &model.DailyTimeActivityResponse{
+		Date:        targetDate.Format("2006-01-02"),
+		DayOfWeek:   targetDate.Weekday().String(),
+		HourStats:   hourlyActivity,
+		TotalClicks: totalClicks,
+	}
+}

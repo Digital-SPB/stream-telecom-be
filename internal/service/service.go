@@ -19,6 +19,7 @@ type Click interface {
 	GetClickDynamic(id int64) (*model.CampaignStats, error)
 	GetCustomerReactionTime(campaignID int64) (*model.ReactionTimeMetrics, error)
 	GetTimeActivity() *model.TimeActivityResponse
+	GetDailyTimeActivity(targetDate time.Time) *model.DailyTimeActivityResponse
 }
 
 type Regions interface {

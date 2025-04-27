@@ -105,7 +105,30 @@ func (h *Handler) clientHotPoint(c *gin.Context) {
 	c.JSON(http.StatusOK, heatMap)
 }
 
-func (h *Handler) activityTime(c *gin.Context) {}
+func (h *Handler) activityTime(c *gin.Context) {
+	// Получаем дату из параметров запроса
+	dateStr := c.Query("date")
+	if dateStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "date parameter is required in format YYYY-MM-DD",
+		})
+		return
+	}
+
+	// Парсим дату
+	targetDate, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid date format, use YYYY-MM-DD",
+		})
+		return
+	}
+
+	// Получаем статистику активности за день
+	activity := h.services.Click.GetDailyTimeActivity(targetDate)
+	
+	c.JSON(http.StatusOK, activity)
+}
 
 func (h *Handler) regionInfo(c *gin.Context) {
 	regionsInfo := h.services.GetRegionsInfo()

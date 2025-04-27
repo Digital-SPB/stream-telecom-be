@@ -52,3 +52,11 @@ type TimeActivityResponse struct {
 	DayStats []DayActivity `json:"day_stats"` // Статистика по дням недели
 }
 
+// Структура для активности за конкретный день
+type DailyTimeActivityResponse struct {
+	Date       string         `json:"date"`         // Дата в формате YYYY-MM-DD
+	DayOfWeek  string         `json:"day_of_week"`  // День недели
+	TotalClicks int           `json:"total_clicks"` // Общее количество кликов за день
+	HourStats  []HourActivity `json:"hour_stats"`   // Статистика по часам
+}
+

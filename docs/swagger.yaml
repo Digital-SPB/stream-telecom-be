@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Stream Telecom API
+  title: Stream Telecom Analytics API
   description: API для анализа и управления рекламными кампаниями
   version: 1.0.0
 servers:
@@ -32,42 +32,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  campaign_id:
-                    type: integer
-                    format: int64
-                  created_at:
-                    type: string
-                    format: date-time
-                  hourly_stats:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        hour:
-                          type: string
-                          format: date-time
-                        clicks:
-                          type: integer
+                $ref: "#/components/schemas/ActivityMetrics"
         "400":
-          description: Неверные параметры запроса
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/BadRequest"
         "404":
-          description: Кампания не найдена
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: Внутренняя ошибка сервера
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/InternalError"
 
   /campaigns:
     get:
@@ -141,22 +112,11 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    region_id:
-                      type: integer
-                    region_name:
-                      type: string
-                    activity_count:
-                      type: integer
+                $ref: "#/components/schemas/RegionHeatMap"
         "400":
-          description: Неверный формат даты
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /client-hot-point:
     get:
@@ -183,20 +143,11 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    region_id:
-                      type: integer
-                    click_count:
-                      type: integer
+                $ref: "#/components/schemas/RegionClickStats"
         "400":
-          description: Неверный формат даты
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /client-reaction-speed:
     get:
@@ -235,7 +186,7 @@ paths:
   /click-dynamic/{id}:
     get:
       summary: Получение динамики кликов
-      description: Возвращает информацию о динамике кликов для указанной кампании
+      description: Возвращает статистику кликов по дням и месяцам для указанной кампании
       parameters:
         - name: id
           in: path
@@ -246,39 +197,22 @@ paths:
           description: ID кампании
       responses:
         "200":
-          description: Успешный ответ с данными о динамике кликов
+          description: Успешный ответ со статистикой кликов
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  click_data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        timestamp:
-                          type: string
-                          format: date-time
-                        count:
-                          type: integer
+                $ref: "#/components/schemas/CampaignStats"
         "400":
-          description: Неверный ID
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: Внутренняя ошибка сервера
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/InternalError"
 
   /create-campaign-dynamic:
     get:
       summary: Получение динамики создания кампаний
-      description: Возвращает информацию о динамике создания рекламных кампаний
+      description: Возвращает статистику создания кампаний за указанный период
       parameters:
         - name: interval_type
           in: query
@@ -303,43 +237,20 @@ paths:
           description: Конечная дата в формате YYYY-MM-DD
       responses:
         "200":
-          description: Успешный ответ с данными о динамике создания кампаний
+          description: Успешный ответ с динамикой создания кампаний
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    date:
-                      type: string
-                      format: date
-                    count:
-                      type: integer
-                    campaigns:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id:
-                            type: integer
-                            format: int64
-                          name:
-                            type: string
-                          created_at:
-                            type: string
-                            format: date-time
+                $ref: "#/components/schemas/CampaignDynamic"
         "400":
-          description: Неверные параметры запроса
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /reaction-time:
     get:
       summary: Получение времени реакции клиентов
-      description: Возвращает метрики времени реакции клиентов для указанной кампании
+      description: Возвращает статистику времени реакции клиентов для указанной кампании
       parameters:
         - name: campaign_id
           in: query
@@ -350,139 +261,69 @@ paths:
           description: ID кампании
       responses:
         "200":
-          description: Успешный ответ с метриками времени реакции
+          description: Успешный ответ со статистикой времени реакции
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  average_reaction_time:
-                    type: number
-                    format: float
-                  min_reaction_time:
-                    type: number
-                    format: float
-                  max_reaction_time:
-                    type: number
-                    format: float
+                $ref: "#/components/schemas/ReactionTimeMetrics"
         "400":
-          description: Неверные параметры запроса
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/BadRequest"
         "404":
-          description: Кампания не найдена
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /activity-time:
     get:
-      summary: Получение времени активности
-      description: Возвращает статистику по времени активности пользователей
+      summary: Получение статистики активности по времени
+      description: Возвращает статистику активности пользователей по часам для указанной даты
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Дата в формате YYYY-MM-DD
       responses:
         "200":
-          description: Успешный ответ с данными о времени активности
+          description: Успешный ответ со статистикой активности
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  hourly_activity:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        hour:
-                          type: integer
-                          minimum: 0
-                          maximum: 23
-                        activity_count:
-                          type: integer
-                  peak_hours:
-                    type: array
-                    items:
-                      type: integer
-                      minimum: 0
-                      maximum: 23
+                $ref: "#/components/schemas/DailyTimeActivity"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /predict-best-time:
     get:
-      summary: Прогноз лучшего времени для кампании
-      description: Возвращает прогноз оптимального времени для запуска рекламной кампании
+      summary: Прогноз оптимального времени активности
+      description: Возвращает прогноз наиболее эффективного времени для запуска кампаний
       responses:
         "200":
-          description: Успешный ответ с прогнозом лучшего времени
+          description: Успешный ответ с прогнозом времени активности
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  best_hours:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        hour:
-                          type: integer
-                          minimum: 0
-                          maximum: 23
-                        score:
-                          type: number
-                          format: float
-                          description: Оценка эффективности (0-1)
-                  best_days:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        day:
-                          type: string
-                          enum:
-                            [
-                              Monday,
-                              Tuesday,
-                              Wednesday,
-                              Thursday,
-                              Friday,
-                              Saturday,
-                              Sunday,
-                            ]
-                        score:
-                          type: number
-                          format: float
-                          description: Оценка эффективности (0-1)
+                $ref: "#/components/schemas/TimeActivityResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /regions-info:
     get:
       summary: Получение информации о регионах
-      description: Возвращает общую информацию о всех регионах
+      description: Возвращает статистическую информацию по всем регионам
       responses:
         "200":
           description: Успешный ответ с информацией о регионах
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    region_id:
-                      type: integer
-                    region_name:
-                      type: string
-                    statistics:
-                      type: object
-                      properties:
-                        total_campaigns:
-                          type: integer
-                        total_clicks:
-                          type: integer
-                        average_response_time:
-                          type: number
-                          format: float
+                $ref: "#/components/schemas/RegionsInfo"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
 components:
   schemas:
@@ -496,3 +337,236 @@ components:
       required:
         - status
         - message
+
+    ActivityMetrics:
+      type: object
+      properties:
+        campaign_id:
+          type: integer
+          format: int64
+        hourly_stats:
+          type: array
+          items:
+            type: object
+            properties:
+              hour:
+                type: string
+                format: date-time
+              clicks:
+                type: integer
+
+    CampaignStats:
+      type: object
+      properties:
+        daily_stats:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              clicks_count:
+                type: integer
+              percentage:
+                type: number
+                format: float
+        monthly_stats:
+          type: array
+          items:
+            type: object
+            properties:
+              month:
+                type: string
+                format: date
+              clicks_count:
+                type: integer
+              percentage:
+                type: number
+                format: float
+        total_clicks:
+          type: integer
+
+    CampaignDynamic:
+      type: array
+      items:
+        type: object
+        properties:
+          date:
+            type: string
+            format: date
+          count:
+            type: integer
+          campaigns:
+            type: array
+            items:
+              $ref: "#/components/schemas/Campaign"
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    ReactionTimeMetrics:
+      type: object
+      properties:
+        campaign_id:
+          type: integer
+          format: int64
+        average_time:
+          $ref: "#/components/schemas/FormattedDuration"
+        median_time:
+          $ref: "#/components/schemas/FormattedDuration"
+        min_time:
+          $ref: "#/components/schemas/FormattedDuration"
+        max_time:
+          $ref: "#/components/schemas/FormattedDuration"
+        percentile_90th:
+          $ref: "#/components/schemas/FormattedDuration"
+        percentile_95th:
+          $ref: "#/components/schemas/FormattedDuration"
+        total_customers:
+          type: integer
+
+    FormattedDuration:
+      type: object
+      properties:
+        years:
+          type: integer
+        months:
+          type: integer
+        days:
+          type: integer
+        hours:
+          type: integer
+        minutes:
+          type: integer
+        seconds:
+          type: integer
+
+    RegionHeatMap:
+      type: array
+      items:
+        type: object
+        properties:
+          region_id:
+            type: integer
+          region_name:
+            type: string
+          activity_count:
+            type: integer
+
+    RegionClickStats:
+      type: array
+      items:
+        type: object
+        properties:
+          region_id:
+            type: integer
+          click_count:
+            type: integer
+
+    DailyTimeActivity:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        day_of_week:
+          type: string
+        total_clicks:
+          type: integer
+        hour_stats:
+          type: array
+          items:
+            type: object
+            properties:
+              hour:
+                type: integer
+                minimum: 0
+                maximum: 23
+              activity:
+                type: integer
+
+    TimeActivityResponse:
+      type: object
+      properties:
+        day_stats:
+          type: array
+          items:
+            type: object
+            properties:
+              day:
+                type: string
+              hour_stats:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    hour:
+                      type: integer
+                      minimum: 0
+                      maximum: 23
+                    activity:
+                      type: integer
+
+    CampaignList:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        campaigns:
+          type: array
+          items:
+            $ref: "#/components/schemas/Campaign"
+
+    RegionsInfo:
+      type: array
+      items:
+        type: object
+        properties:
+          region_id:
+            type: integer
+          region_name:
+            type: string
+          statistics:
+            type: object
+            properties:
+              total_campaigns:
+                type: integer
+              total_clicks:
+                type: integer
+              average_response_time:
+                type: number
+                format: float
+
+  responses:
+    BadRequest:
+      description: Неверные параметры запроса
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
