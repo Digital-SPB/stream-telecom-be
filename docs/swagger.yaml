@@ -1,0 +1,371 @@
+openapi: 3.0.0
+info:
+  title: Stream Telecom API
+  description: API для анализа и управления рекламными кампаниями
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: API версии 1
+paths:
+  /activity:
+    get:
+      summary: Получение активности кампании
+      description: Возвращает метрики активности для указанной кампании за определенный период времени
+      parameters:
+        - name: campaign_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID кампании
+        - name: count_hours
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Количество часов для анализа
+      responses:
+        "200":
+          description: Успешный ответ с метриками активности
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  campaign_id:
+                    type: integer
+                    format: int64
+                  created_at:
+                    type: string
+                    format: date-time
+                  hourly_stats:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        hour:
+                          type: string
+                          format: date-time
+                        clicks:
+                          type: integer
+        "400":
+          description: Неверные параметры запроса
+        "404":
+          description: Кампания не найдена
+        "500":
+          description: Внутренняя ошибка сервера
+
+  /campaigns:
+    get:
+      summary: Получение списка всех кампаний
+      description: Возвращает постраничный список всех кампаний
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Номер страницы
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Количество элементов на странице
+      responses:
+        "200":
+          description: Успешный ответ со списком кампаний
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+                  campaigns:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                        name:
+                          type: string
+                        created_at:
+                          type: string
+                          format: date-time
+
+  /heat-map:
+    get:
+      summary: Получение тепловой карты активности по регионам
+      description: Возвращает данные для построения тепловой карты активности пользователей по регионам
+      parameters:
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Начальная дата в формате YYYY-MM-DD
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Конечная дата в формате YYYY-MM-DD
+      responses:
+        "200":
+          description: Успешный ответ с данными тепловой карты
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    region_id:
+                      type: integer
+                    region_name:
+                      type: string
+                    activity_count:
+                      type: integer
+        "400":
+          description: Неверный формат даты
+
+  /client-hot-point:
+    get:
+      summary: Получение точек активности клиентов
+      description: Возвращает данные о количестве кликов по регионам за период
+      parameters:
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Начальная дата в формате YYYY-MM-DD
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Конечная дата в формате YYYY-MM-DD
+      responses:
+        "200":
+          description: Успешный ответ с данными о кликах
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    region_id:
+                      type: integer
+                    click_count:
+                      type: integer
+        "400":
+          description: Неверный формат даты
+
+  /client-reaction-speed:
+    get:
+      summary: Получение времени реакции клиентов
+      description: Возвращает метрики времени реакции клиентов для указанной кампании
+      parameters:
+        - name: campaign_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID кампании
+      responses:
+        "200":
+          description: Успешный ответ с метриками времени реакции
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  average_reaction_time:
+                    type: number
+                    format: float
+                  min_reaction_time:
+                    type: number
+                    format: float
+                  max_reaction_time:
+                    type: number
+                    format: float
+        "400":
+          description: Неверные параметры запроса
+        "404":
+          description: Кампания не найдена
+
+  /click-dynamic/{id}:
+    get:
+      summary: Получение динамики кликов
+      description: Возвращает информацию о динамике кликов для указанного ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID для анализа динамики кликов
+      responses:
+        "200":
+          description: Успешный ответ с данными о динамике кликов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  click_data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: string
+                          format: date-time
+                        count:
+                          type: integer
+        "400":
+          description: Неверный ID
+        "404":
+          description: Данные не найдены
+
+  /create-campain-dynamic:
+    get:
+      summary: Получение динамики создания кампаний
+      description: Возвращает информацию о динамике создания рекламных кампаний
+      responses:
+        "200":
+          description: Успешный ответ с данными о динамике создания кампаний
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    count:
+                      type: integer
+                    campaigns:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            format: int64
+                          name:
+                            type: string
+                          created_at:
+                            type: string
+                            format: date-time
+
+  /activity-time:
+    get:
+      summary: Получение времени активности
+      description: Возвращает статистику по времени активности пользователей
+      responses:
+        "200":
+          description: Успешный ответ с данными о времени активности
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hourly_activity:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        hour:
+                          type: integer
+                          minimum: 0
+                          maximum: 23
+                        activity_count:
+                          type: integer
+                  peak_hours:
+                    type: array
+                    items:
+                      type: integer
+                      minimum: 0
+                      maximum: 23
+
+  /predict-best-time:
+    get:
+      summary: Прогноз лучшего времени для кампании
+      description: Возвращает прогноз оптимального времени для запуска рекламной кампании
+      responses:
+        "200":
+          description: Успешный ответ с прогнозом лучшего времени
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  best_hours:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        hour:
+                          type: integer
+                          minimum: 0
+                          maximum: 23
+                        score:
+                          type: number
+                          format: float
+                          description: Оценка эффективности (0-1)
+                  best_days:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        day:
+                          type: string
+                          enum:
+                            [
+                              Monday,
+                              Tuesday,
+                              Wednesday,
+                              Thursday,
+                              Friday,
+                              Saturday,
+                              Sunday,
+                            ]
+                        score:
+                          type: number
+                          format: float
+                          description: Оценка эффективности (0-1)
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+      required:
+        - status
+        - message
