@@ -3,6 +3,7 @@ package repo
 import (
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -249,6 +250,9 @@ func (r *ClickRepo) GetTimeActivity() *model.TimeActivityResponse {
 		DayStats: make([]model.DayActivity, 0, 7),
 	}
 
+	min := 32767
+	max := 0
+
 	// Заполняем статистику по дням
 	for _, day := range daysOfWeek {
 		dayActivity := model.DayActivity{
@@ -263,10 +267,23 @@ func (r *ClickRepo) GetTimeActivity() *model.TimeActivityResponse {
 				Activity: activityMatrix[day][hour],
 			}
 			dayActivity.HourStats = append(dayActivity.HourStats, hourActivity)
+
+			log.Println(activityMatrix[day][hour], max, min)
+
+			if activityMatrix[day][hour] > max {
+				max = activityMatrix[day][hour]
+			}
+
+			if activityMatrix[day][hour] < min {
+				min = activityMatrix[day][hour]
+			}
 		}
 
 		response.DayStats = append(response.DayStats, dayActivity)
 	}
+
+	response.Max = int64(max)
+	response.Min = int64(min)
 
 	return response
 }

@@ -49,6 +49,8 @@ type DayActivity struct {
 }
 
 type TimeActivityResponse struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
 	DayStats []DayActivity `json:"day_stats"` // Статистика по дням недели
 }
 
