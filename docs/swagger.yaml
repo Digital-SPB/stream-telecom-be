@@ -52,10 +52,22 @@ paths:
                           type: integer
         "400":
           description: Неверные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "404":
           description: Кампания не найдена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "500":
           description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /campaigns:
     get:
@@ -141,6 +153,10 @@ paths:
                       type: integer
         "400":
           description: Неверный формат даты
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /client-hot-point:
     get:
@@ -177,6 +193,10 @@ paths:
                       type: integer
         "400":
           description: Неверный формат даты
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /client-reaction-speed:
     get:
@@ -215,7 +235,7 @@ paths:
   /click-dynamic/{id}:
     get:
       summary: Получение динамики кликов
-      description: Возвращает информацию о динамике кликов для указанного ID
+      description: Возвращает информацию о динамике кликов для указанной кампании
       parameters:
         - name: id
           in: path
@@ -223,7 +243,7 @@ paths:
           schema:
             type: integer
             format: int64
-          description: ID для анализа динамики кликов
+          description: ID кампании
       responses:
         "200":
           description: Успешный ответ с данными о динамике кликов
@@ -244,13 +264,43 @@ paths:
                           type: integer
         "400":
           description: Неверный ID
-        "404":
-          description: Данные не найдены
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
-  /create-campain-dynamic:
+  /create-campaign-dynamic:
     get:
       summary: Получение динамики создания кампаний
       description: Возвращает информацию о динамике создания рекламных кампаний
+      parameters:
+        - name: interval_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [day, month]
+          description: Тип интервала для группировки (день или месяц)
+        - name: start_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Начальная дата в формате YYYY-MM-DD
+        - name: end_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Конечная дата в формате YYYY-MM-DD
       responses:
         "200":
           description: Успешный ответ с данными о динамике создания кампаний
@@ -279,6 +329,54 @@ paths:
                           created_at:
                             type: string
                             format: date-time
+        "400":
+          description: Неверные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /reaction-time:
+    get:
+      summary: Получение времени реакции клиентов
+      description: Возвращает метрики времени реакции клиентов для указанной кампании
+      parameters:
+        - name: campaign_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: ID кампании
+      responses:
+        "200":
+          description: Успешный ответ с метриками времени реакции
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  average_reaction_time:
+                    type: number
+                    format: float
+                  min_reaction_time:
+                    type: number
+                    format: float
+                  max_reaction_time:
+                    type: number
+                    format: float
+        "400":
+          description: Неверные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Кампания не найдена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /activity-time:
     get:
@@ -356,6 +454,35 @@ paths:
                           type: number
                           format: float
                           description: Оценка эффективности (0-1)
+
+  /regions-info:
+    get:
+      summary: Получение информации о регионах
+      description: Возвращает общую информацию о всех регионах
+      responses:
+        "200":
+          description: Успешный ответ с информацией о регионах
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    region_id:
+                      type: integer
+                    region_name:
+                      type: string
+                    statistics:
+                      type: object
+                      properties:
+                        total_campaigns:
+                          type: integer
+                        total_clicks:
+                          type: integer
+                        average_response_time:
+                          type: number
+                          format: float
 
 components:
   schemas:

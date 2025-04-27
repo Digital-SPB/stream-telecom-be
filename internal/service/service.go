@@ -23,6 +23,7 @@ type Click interface {
 type Regions interface {
 	GetMembersHeatMap(startDate, endDate time.Time) []*model.RegionMembersHeatMap
 	GetRegionsInfo() []*model.RegionInfo
+	GetCountClick(startDate, endDate time.Time) []*model.CountClickByRegion
 }
 
 type Service struct {
@@ -33,8 +34,8 @@ type Service struct {
 
 func NewService(repos *repo.Repository) *Service {
 	return &Service{
-		Campaign:  NewCampaignService(repos),
-		Click: NewClickService(repos),
+		Campaign: NewCampaignService(repos),
+		Click:    NewClickService(repos),
 		Regions:  NewRegionService(repos),
 	}
 }
