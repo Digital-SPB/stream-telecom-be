@@ -23,7 +23,7 @@ func NewClickService(repos *repo.Repository) *ClickService {
 }
 
 func (s *ClickService) MembersActivityClicks(campaignID int64) {
-	clicks := s.clickRepository.GetByCampaignID(campaignID)
+	// clicks := s.clickRepository.GetByCampaignID(campaignID)
 }
 
 func formatDuration(seconds float64) model.FormattedDuration {
