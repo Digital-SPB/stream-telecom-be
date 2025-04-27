@@ -206,8 +206,19 @@ func (r *ClickRepo) GetAll() []*model.Click {
 func (r *ClickRepo) GetTimeActivity() *model.TimeActivityResponse {
 	// Создаем матрицу для хранения количества кликов по дням недели и часам
 	activityMatrix := make(map[string]map[int]int)
-	daysOfWeek := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+	daysOfWeek := []string{"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"}
 	
+	// Маппинг английских названий дней на русские сокращения
+	dayMapping := map[string]string{
+		"Monday":    "ПН",
+		"Tuesday":   "ВТ",
+		"Wednesday": "СР",
+		"Thursday":  "ЧТ",
+		"Friday":    "ПТ",
+		"Saturday":  "СБ",
+		"Sunday":    "ВС",
+	}
+
 	// Инициализируем матрицу
 	for _, day := range daysOfWeek {
 		activityMatrix[day] = make(map[int]int)
@@ -225,11 +236,12 @@ func (r *ClickRepo) GetTimeActivity() *model.TimeActivityResponse {
 		localTime := click.ClickTime.Add(time.Duration(offset) * time.Hour)
 		
 		// Получаем день недели и час в локальном времени
-		dayOfWeek := localTime.Weekday().String()
+		englishDay := localTime.Weekday().String()
+		russianDay := dayMapping[englishDay]
 		hour := localTime.Hour()
 		
 		// Увеличиваем счетчик для соответствующего дня и часа
-		activityMatrix[dayOfWeek][hour]++
+		activityMatrix[russianDay][hour]++
 	}
 
 	// Формируем ответ
