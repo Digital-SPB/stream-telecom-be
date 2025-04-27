@@ -9,7 +9,7 @@ import (
 
 type RegionService struct {
 	regionRepository repo.Regions
-	clickRepository  repo.Click
+	clickRepository repo.Click
 }
 
 func NewRegionService(repos *repo.Repository) *RegionService {
@@ -111,4 +111,8 @@ func (s *RegionService) GetCountClick(startDate, endDate time.Time) []*model.Cou
 	}
 
 	return count
+}
+
+func (s *RegionService) GetRegionsInfo() []*model.RegionInfo {
+	return s.regionRepository.GetRegionsInfo()
 }

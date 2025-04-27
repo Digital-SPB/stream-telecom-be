@@ -12,15 +12,17 @@ import (
 type Campaign interface {
 	GetCampaignActivity(campaignID int64, countHours int64) (*model.ActivityMetrics, error)
 	GetAllCampaigns(page, perPage int) *model.CampaignList
+	GetCreationDynamic(start time.Time, end time.Time, intervalType string) ([]*model.IntervalResult, error)
 }
 
 type Click interface {
+	GetClickDynamic(id int64) (*model.CampaignStats, error)
 	GetCustomerReactionTime(campaignID int64) (*model.ReactionTimeMetrics, error)
 }
 
 type Regions interface {
 	GetMembersHeatMap(startDate, endDate time.Time) []*model.RegionMembersHeatMap
-	GetCountClick(startDate, endDate time.Time) []*model.CountClickByRegion
+	GetRegionsInfo() []*model.RegionInfo
 }
 
 type Service struct {
@@ -31,8 +33,8 @@ type Service struct {
 
 func NewService(repos *repo.Repository) *Service {
 	return &Service{
-		Campaign: NewCampaignService(repos),
-		Click:    NewClickService(repos),
+		Campaign:  NewCampaignService(repos),
+		Click: NewClickService(repos),
 		Regions:  NewRegionService(repos),
 	}
 }

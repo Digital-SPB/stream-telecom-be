@@ -53,3 +53,9 @@ type CampaignInfo struct {
 	CreatedAt time.Time `json:"created_at"`
 	Name      string    `json:"name"`
 }
+
+//3 ручка
+type IntervalResult struct {
+	Date    time.Time `json:"date"`
+	Count   int       `json:"count"`
+}

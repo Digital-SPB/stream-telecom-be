@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -99,6 +100,93 @@ func LoadClickRepo() *ClickRepo {
 	return &ClickRepo{
 		Clicks: clicks,
 	}
+}
+
+/*
+сколько кликов по компании в день
+% от клиеов по компании за все время
+сколько кликов в месяц
+% от кликов за все время
+*/
+func (r *ClickRepo) GetClickDynamic(id int64) (*model.CampaignStats, error) {
+	// Фильтруем клики по campaignID
+	var filteredClicks []*model.Click
+	totalClicks := 0
+
+	for _, click := range r.Clicks {
+		if click.CampaignID == id {
+			filteredClicks = append(filteredClicks, click)
+			totalClicks++
+		}
+	}
+
+	if totalClicks == 0 {
+		return nil, fmt.Errorf("no clicks found for campaign ID %d", id)
+	}
+
+	// Группируем клики по дням и месяцам
+	dailyCounts := make(map[time.Time]int)
+	monthlyCounts := make(map[time.Time]int)
+
+	for _, click := range filteredClicks {
+		// Для дневной статистики
+		day := time.Date(
+			click.ClickDate.Year(),
+			click.ClickDate.Month(),
+			click.ClickDate.Day(),
+			0, 0, 0, 0,
+			click.ClickDate.Location(),
+		)
+		dailyCounts[day]++
+
+		// Для месячной статистики (первый день месяца)
+		month := time.Date(
+			click.ClickDate.Year(),
+			click.ClickDate.Month(),
+			1,
+			0, 0, 0, 0,
+			click.ClickDate.Location(),
+		)
+		monthlyCounts[month]++
+	}
+
+	// Формируем дневную статистику
+	var dailyStats []*model.DailyStat
+	for date, count := range dailyCounts {
+		percentage := float64(count) / float64(totalClicks) * 100
+		dailyStats = append(dailyStats, &model.DailyStat{
+			Date:        date,
+			ClicksCount: count,
+			Percentage:  percentage,
+		})
+	}
+
+	// Сортируем по дате
+	sort.Slice(dailyStats, func(i, j int) bool {
+		return dailyStats[i].Date.Before(dailyStats[j].Date)
+	})
+
+	// Формируем месячную статистику
+	var monthlyStats []*model.MonthlyStat
+	for month, count := range monthlyCounts {
+		percentage := float64(count) / float64(totalClicks) * 100
+		monthlyStats = append(monthlyStats, &model.MonthlyStat{
+			Month:       month,
+			ClicksCount: count,
+			Percentage:  percentage,
+		})
+	}
+
+	// Сортируем по месяцу
+	sort.Slice(monthlyStats, func(i, j int) bool {
+		return monthlyStats[i].Month.Before(monthlyStats[j].Month)
+	})
+
+	return &model.CampaignStats{
+		DailyStats:   dailyStats,
+		MonthlyStats: monthlyStats,
+		TotalClicks:  totalClicks,
+	}, nil
 }
 
 func (r *ClickRepo) GetByCampaignID(id int64) []*model.Click {

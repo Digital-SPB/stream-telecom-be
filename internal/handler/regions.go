@@ -52,7 +52,7 @@ func (h *Handler) heatMap(c *gin.Context) {
 	}
 
 	heatMap := h.services.Regions.GetMembersHeatMap(start, end)
-
+	
 	c.JSON(http.StatusOK, heatMap)
 }
 
@@ -106,3 +106,9 @@ func (h *Handler) clientHotPoint(c *gin.Context) {
 }
 
 func (h *Handler) activityTime(c *gin.Context) {}
+
+func (h *Handler) regionInfo(c *gin.Context) {
+	regionsInfo := h.services.GetRegionsInfo()
+
+	c.JSON(http.StatusOK, regionsInfo)
+}

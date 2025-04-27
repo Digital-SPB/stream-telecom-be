@@ -22,8 +22,8 @@ func NewClickService(repos *repo.Repository) *ClickService {
 	}
 }
 
-func (s *ClickService) MembersActivityClicks(campaignID int64) {
-	// clicks := s.clickRepository.GetByCampaignID(campaignID)
+func (s *ClickService) GetClickDynamic(id int64) (*model.CampaignStats, error) {
+	return s.clickRepository.GetClickDynamic(id)
 }
 
 func formatDuration(seconds float64) model.FormattedDuration {

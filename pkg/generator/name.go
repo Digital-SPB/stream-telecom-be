@@ -70,4 +70,4 @@ func toUpper(c byte) byte {
 		return c - ('a' - 'A')
 	}
 	return c
-} 
+}

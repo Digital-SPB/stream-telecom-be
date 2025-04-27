@@ -16,3 +16,9 @@ type CountClickByRegion struct {
 	Name        string `json:"name"`
 	ClicksCount int64  `json:"clicks_count"`
 }
+
+type RegionInfo struct {
+    ID          int    `json:"id"`
+    NameEnglish string `json:"name_english"`
+    UTCoffset   string `json:"utc_offset"`
+}
